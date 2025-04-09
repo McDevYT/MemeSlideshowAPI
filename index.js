@@ -2,9 +2,11 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const https = require("https");
+const cors = require("cors"); // Add this line
+
 const app = express();
 const port = process.env.PORT || 4000;
-const cors = require("cors"); // Add this line
 
 // Setup Multer to store files in /images
 const storage = multer.diskStorage({
@@ -14,6 +16,7 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
 app.use(cors()); // Add this line to allow CORS for all origins
 
 // Serve static files from the /images folder
@@ -42,7 +45,7 @@ app.get("/GetNextImage", (req, res) => {
 
     res.json({
       filename: randomImage,
-      url: `http://51.12.220.246:4000/images/${randomImage}`,
+      url: `https://51.12.220.246:4000/images/${randomImage}`, // Use HTTPS here
     });
   });
 });
@@ -60,7 +63,16 @@ app.post("/SaveImage", upload.single("image"), (req, res) => {
   res.json({ message: "Image saved.", filename: req.file.filename });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`API running on http://51.12.220.246:${port}`);
+// HTTPS server configuration
+const server = https.createServer(
+  {
+    key: fs.readFileSync("/path/to/your/privkey.pem"), // Replace with the path to your private key
+    cert: fs.readFileSync("/path/to/your/fullchain.pem"), // Replace with the path to your full certificate chain
+  },
+  app
+);
+
+// Start the HTTPS server
+server.listen(port, () => {
+  console.log(`API running on https://51.12.220.246:${port}`);
 });
