@@ -69,8 +69,8 @@ app.post("/SaveImage", upload.single("image"), (req, res) => {
 // HTTPS server configuration
 const server = https.createServer(
   {
-    key: fs.readFileSync("../etc/letsencrypt/live/mcdevyt.com/privkey.pem"), // Replace with the path to your private key
-    cert: fs.readFileSync("../etc/letsencrypt/live/mcdevyt.com/fullchain.pem"), // Replace with the path to your full certificate chain
+    key: fs.readFileSync("/etc/letsencrypt/live/mcdevyt.com/privkey.pem"), // Replace with the path to your private key
+    cert: fs.readFileSync("/etc/letsencrypt/live/mcdevyt.com/fullchain.pem"), // Replace with the path to your full certificate chain
   },
   app
 );
