@@ -112,7 +112,7 @@ app.get("/GetAllImages", (req, res) => {
     }
 
     const imageFiles = files.filter((file) =>
-      /\.(jpg|jpeg|png|gif|bmp|webp|png|jifif|PNG)$/i.test(file)
+      /\.(jpg|jpeg|png|gif|bmp|webp|png|jfif|PNG)$/i.test(file)
     );
     res.json(imageFiles);
   });
