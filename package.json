@@ -1,0 +1,17 @@
+{
+  "name": "memeslideshowapi",
+  "version": "1.0.0",
+  "description": "Image API using Node.js, Express, and MySQL",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mysql2": "^2.2.5",
+    "multer": "^1.4.3",
+    "dotenv": "^8.2.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

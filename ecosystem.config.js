@@ -1,11 +1,12 @@
 module.exports = {
   apps: [
     {
-      name: "MemeSlideshowAPI",
+      name: "image-api",
       script: "./index.js",
       watch: true,
       env: {
         NODE_ENV: "production",
+        PORT: 4000,
       },
     },
   ],
