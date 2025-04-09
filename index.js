@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 4000;
+const cors = require("cors"); // Add this line
 
 // Setup Multer to store files in /images
 const storage = multer.diskStorage({
@@ -13,6 +14,7 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+app.use(cors()); // Add this line to allow CORS for all origins
 
 // Serve static files from the /images folder
 app.use("/images", express.static("images"));
@@ -40,7 +42,7 @@ app.get("/GetNextImage", (req, res) => {
 
     res.json({
       filename: randomImage,
-      url: `/images/${randomImage}`,
+      url: `http://51.12.220.246:4000/images/${randomImage}`,
     });
   });
 });
@@ -60,5 +62,5 @@ app.post("/SaveImage", upload.single("image"), (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`);
+  console.log(`API running on http://51.12.220.246:${port}`);
 });
