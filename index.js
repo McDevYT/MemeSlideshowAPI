@@ -87,3 +87,35 @@ function generateRandomDigits() {
   }
   return randomDigits;
 }
+
+app.delete("/DeleteImage/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "images", filename);
+
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(`Error deleting image "${filename}":`, err);
+      return res.status(404).json({ message: "Image not found." });
+    }
+
+    console.log(`Image "${filename}" deleted.`);
+    res.json({ message: "Image deleted." });
+  });
+});
+
+// GET /ListImages - Return all stored image filenames
+app.get("/ListImages", (req, res) => {
+  fs.readdir("images/", (err, files) => {
+    if (err) {
+      console.error("Error reading images folder:", err);
+      return res.status(500).json({ message: "Server error." });
+    }
+
+    res.json({
+      images: files.map((filename) => ({
+        filename,
+        url: `https://51.12.220.246:4000/images/${filename}`,
+      })),
+    });
+  });
+});
