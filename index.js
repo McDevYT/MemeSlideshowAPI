@@ -8,6 +8,8 @@ const cors = require("cors"); // Add this line
 const app = express();
 const port = process.env.PORT || 4000;
 
+const sendNextQueue = [];
+
 // Setup Multer to store files in /images
 const storage = multer.diskStorage({
   destination: "images/", // Images will be stored here
@@ -39,13 +41,30 @@ app.get("/GetNextImage", (req, res) => {
       return res.status(404).send("No images found.");
     }
 
-    // Select a random image from the folder
-    const randomImage = files[Math.floor(Math.random() * files.length)];
-    console.log("Random image selected:", randomImage);
+    let selectedImage;
+
+    // Serve from queue first
+    while (sendNextQueue.length > 0) {
+      const nextFromQueue = sendNextQueue.shift();
+      if (files.includes(nextFromQueue)) {
+        selectedImage = nextFromQueue;
+        console.log("Serving queued image:", selectedImage);
+        break;
+      } else {
+        console.log(`Queued file not found anymore: ${nextFromQueue}`);
+        // continue looping in case of invalid/removed file
+      }
+    }
+
+    // Fall back to random
+    if (!selectedImage) {
+      selectedImage = files[Math.floor(Math.random() * files.length)];
+      console.log("Serving random image:", selectedImage);
+    }
 
     res.json({
-      filename: randomImage,
-      url: `https://51.12.220.246:4000/images/${randomImage}`, // Use HTTPS here
+      filename: selectedImage,
+      url: `https://51.12.220.246:4000/images/${selectedImage}`,
     });
   });
 });
@@ -116,4 +135,26 @@ app.get("/GetAllImages", (req, res) => {
     );
     res.json(imageFiles);
   });
+});
+
+app.post("/SendNext", (req, res) => {
+  const { filename } = req.body;
+  const filePath = path.join(__dirname, "images", filename);
+
+  if (!fs.existsSync(filePath)) {
+    console.log(`File not found: ${filename}`);
+    return res.status(404).send("File not found.");
+  }
+
+  sendNextQueue.push(filename);
+  console.log(`Queued for next send: ${filename}`);
+  res.send("Image added to send-next queue.");
+});
+
+app.get("/GetSendNextQueue", (req, res) => {
+  res.json(sendNextQueue);
+});
+app.post("/ClearSendNextQueue", (req, res) => {
+  sendNextQueue.length = 0;
+  res.send("Queue cleared.");
 });
