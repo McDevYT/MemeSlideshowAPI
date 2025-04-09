@@ -103,10 +103,6 @@ app.delete("/DeleteImage/:filename", (req, res) => {
   });
 });
 
-// GET /ListImages - Return all stored image filenames
-const fs = require("fs");
-const path = require("path");
-
 app.get("/GetAllImages", (req, res) => {
   console.log("GetAllImages Request");
   fs.readdir(path.join(__dirname, "images"), (err, files) => {
