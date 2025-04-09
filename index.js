@@ -20,6 +20,7 @@ app.use("/images", express.static("images"));
 
 // GET /GetNextImage - Fetch the most recently uploaded image
 app.get("/GetNextImage", async (req, res) => {
+  console.log("GetNextImage Request");
   try {
     const [rows] = await pool.query(
       "SELECT filename FROM images ORDER BY uploaded_at DESC LIMIT 1"
@@ -39,6 +40,8 @@ app.get("/GetNextImage", async (req, res) => {
 
 // POST /SaveImage - Save an uploaded image to disk and database
 app.post("/SaveImage", upload.single("image"), async (req, res) => {
+  console.log("SaveImage Request");
+
   if (!req.file) return res.status(400).send("No image uploaded.");
 
   try {
