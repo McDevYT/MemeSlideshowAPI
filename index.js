@@ -62,7 +62,7 @@ app.post("/SaveImage", upload.single("image"), (req, res) => {
   console.log("Image uploaded:", req.file.filename);
   res.json({
     message: "Image saved.",
-    filename: req.file.filename + generateRandomDigits().toString(),
+    filename: req.file.filename + generateRandomDigits(),
   });
 });
 
