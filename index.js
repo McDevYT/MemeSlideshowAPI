@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.use("/images", express.static("images")); // serve images statically from /images
+app.use("/images", express.static("images"));
 
 // GET /GetNextImage - Fetch the most recently uploaded image
 app.get("/GetNextImage", async (req, res) => {
