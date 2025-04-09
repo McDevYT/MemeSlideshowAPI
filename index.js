@@ -60,14 +60,17 @@ app.post("/SaveImage", upload.single("image"), (req, res) => {
   }
 
   console.log("Image uploaded:", req.file.filename);
-  res.json({ message: "Image saved.", filename: req.file.filename });
+  res.json({
+    message: "Image saved.",
+    filename: req.file.filename + generateRandomDigits().toString(),
+  });
 });
 
 // HTTPS server configuration
 const server = https.createServer(
   {
-    key: fs.readFileSync("/path/to/your/privkey.pem"), // Replace with the path to your private key
-    cert: fs.readFileSync("/path/to/your/fullchain.pem"), // Replace with the path to your full certificate chain
+    key: fs.readFileSync("../etc/letsencrypt/live/mcdevyt.com/privkey.pem"), // Replace with the path to your private key
+    cert: fs.readFileSync("../etc/letsencrypt/live/mcdevyt.com/fullchain.pem"), // Replace with the path to your full certificate chain
   },
   app
 );
@@ -76,3 +79,11 @@ const server = https.createServer(
 server.listen(port, () => {
   console.log(`API running on https://51.12.220.246:${port}`);
 });
+
+function generateRandomDigits() {
+  let randomDigits = "";
+  for (let i = 0; i < 10; i++) {
+    randomDigits += Math.floor(Math.random() * 10); // Generates a random digit between 0 and 9
+  }
+  return randomDigits;
+}
