@@ -51,7 +51,7 @@ app.get("/GetNextImage", (req, res) => {
         console.log("Serving queued image:", selectedImage);
         break;
       } else {
-        console.log(Queued file not found anymore: ${nextFromQueue});
+        console.log(`Queued file not found anymore: ${nextFromQueue}`);
         // continue looping in case of invalid/removed file
       }
     }
@@ -64,7 +64,7 @@ app.get("/GetNextImage", (req, res) => {
 
     res.json({
       filename: selectedImage,
-      url: https://51.12.220.246:4000/images/${selectedImage},
+      url: `https://51.12.220.246:4000/images/${selectedImage}`,
     });
   });
 });
@@ -96,7 +96,7 @@ const server = https.createServer(
 
 // Start the HTTPS server
 server.listen(port, () => {
-  console.log(API running on https://51.12.220.246:${port});
+  console.log(`API running on https://51.12.220.246:${port}`);
 });
 
 function generateRandomDigits() {
@@ -113,11 +113,11 @@ app.delete("/DeleteImage/:filename", (req, res) => {
 
   fs.unlink(filePath, (err) => {
     if (err) {
-      console.error(Error deleting image "${filename}":, err);
+      console.error(`Error deleting image "${filename}":`, err);
       return res.status(404).json({ message: "Image not found." });
     }
 
-    console.log(Image "${filename}" deleted.);
+    console.log(`Image "${filename}" deleted.`);
     res.json({ message: "Image deleted." });
   });
 });
@@ -142,12 +142,12 @@ app.post("/SendNext", (req, res) => {
   const filePath = path.join(__dirname, "images", filename);
 
   if (!fs.existsSync(filePath)) {
-    console.log(File not found: ${filename});
+    console.log(`File not found: ${filename}`);
     return res.status(404).send("File not found.");
   }
 
   sendNextQueue.push(filename);
-  console.log(Queued for next send: ${filename});
+  console.log(`Queued for next send: ${filename}`);
   res.send("Image added to send-next queue.");
 });
 
