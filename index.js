@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
-const fun = false;
+let fun = false;
 app.use(cors());
 
 app.use("/images", express.static("images"));
@@ -25,8 +25,6 @@ app.use("/images", express.static("images"));
 app.use(express.json());
 
 app.get("/GetNextImage", (req, res) => {
-  console.log("GetNextImage Request");
-
   fs.readdir("images/", (err, files) => {
     if (err) {
       console.error("Error reading images folder:", err);
