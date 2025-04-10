@@ -3,30 +3,27 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
-const cors = require("cors"); // Add this line
+const cors = require("cors");
 
 const app = express();
 const port = process.env.PORT || 4000;
 
 const sendNextQueue = [];
 
-// Setup Multer to store files in /images
 const storage = multer.diskStorage({
-  destination: "images/", // Images will be stored here
+  destination: "images/",
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename with timestamp
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 const upload = multer({ storage });
+const fun = false;
+app.use(cors());
 
-app.use(cors()); // Add this line to allow CORS for all origins
-
-// Serve static files from the /images folder
 app.use("/images", express.static("images"));
 
 app.use(express.json());
 
-// GET /GetNextImage - Fetch a random image from the /images folder
 app.get("/GetNextImage", (req, res) => {
   console.log("GetNextImage Request");
 
@@ -43,7 +40,6 @@ app.get("/GetNextImage", (req, res) => {
 
     let selectedImage;
 
-    // Serve from queue first
     while (sendNextQueue.length > 0) {
       const nextFromQueue = sendNextQueue.shift();
       if (files.includes(nextFromQueue)) {
@@ -52,11 +48,9 @@ app.get("/GetNextImage", (req, res) => {
         break;
       } else {
         console.log(`Queued file not found anymore: ${nextFromQueue}`);
-        // continue looping in case of invalid/removed file
       }
     }
 
-    // Fall back to random
     if (!selectedImage) {
       selectedImage = files[Math.floor(Math.random() * files.length)];
       console.log("Serving random image:", selectedImage);
@@ -65,11 +59,12 @@ app.get("/GetNextImage", (req, res) => {
     res.json({
       filename: selectedImage,
       url: `https://51.12.220.246:4000/images/${selectedImage}`,
+      fun: fun,
     });
+    fun = false;
   });
 });
 
-// POST /SaveImage - Save an uploaded image to the /images folder
 app.post("/SaveImage", upload.single("image"), (req, res) => {
   console.log("SaveImage Request");
 
@@ -85,16 +80,14 @@ app.post("/SaveImage", upload.single("image"), (req, res) => {
   });
 });
 
-// HTTPS server configuration
 const server = https.createServer(
   {
-    key: fs.readFileSync("/etc/letsencrypt/live/mcdevyt.com/privkey.pem"), // Replace with the path to your private key
-    cert: fs.readFileSync("/etc/letsencrypt/live/mcdevyt.com/fullchain.pem"), // Replace with the path to your full certificate chain
+    key: fs.readFileSync("/etc/letsencrypt/live/mcdevyt.com/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/mcdevyt.com/fullchain.pem"),
   },
   app
 );
 
-// Start the HTTPS server
 server.listen(port, () => {
   console.log(`API running on https://51.12.220.246:${port}`);
 });
@@ -135,6 +128,12 @@ app.get("/GetAllImages", (req, res) => {
     );
     res.json(imageFiles);
   });
+});
+
+app.post("/Fun", (req, res) => {
+  fun = true;
+  console.log(`FUN!!`);
+  res.send("fun yeah.");
 });
 
 app.post("/SendNext", (req, res) => {
