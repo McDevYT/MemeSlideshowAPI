@@ -84,7 +84,7 @@ app.get("/GetNextSound", (req, res) => {
   console.log("GetNextSound Request");
 
   if (sendNextSoundQueue.length === 0) {
-    return res.status(404).send("No sounds in queue.");
+    return res.send("No sounds in queue.");
   }
 
   const soundFile = sendNextSoundQueue.shift(); // Get the next sound in the queue
