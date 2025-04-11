@@ -115,20 +115,28 @@ function generateRandomDigits() {
 
 app.delete("/RemoveImage/:filename", (req, res) => {
   const filename = req.params.filename;
-  const remove = req.query.remove === "true"; // Parse as boolean
-  const sourcePath = path.join(__dirname, "images", filename);
+  const remove = req.query.remove === "true"; // Whether to permanently delete
+  const fromRemoved = req.query.fromRemoved === "true"; // Source folder
+
+  const sourceDir = path.join(
+    __dirname,
+    fromRemoved ? "removed_images" : "images"
+  );
+  const sourcePath = path.join(sourceDir, filename);
 
   if (remove) {
+    // Permanently delete
     fs.unlink(sourcePath, (err) => {
       if (err) {
         console.error(`Error deleting image "${filename}":`, err);
         return res.status(404).json({ message: "Image not found." });
       }
 
-      console.log(`Image "${filename}" deleted.`);
+      console.log(`Image "${filename}" permanently deleted.`);
       res.json({ message: "Image deleted." });
     });
   } else {
+    // Move to removed_images
     const targetDir = path.join(__dirname, "removed_images");
 
     if (!fs.existsSync(targetDir)) {
