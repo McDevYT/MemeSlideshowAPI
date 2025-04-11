@@ -23,6 +23,7 @@ let fun = false;
 app.use(cors());
 
 app.use("/images", express.static("images"));
+app.use("/removed_images", express.static("removed_images"));
 
 app.use(express.json());
 
