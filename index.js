@@ -72,7 +72,7 @@ app.get("/GetNextImage", (req, res) => {
     res.json({
       filename: selectedImage,
       url: `https://51.12.220.246:4000/images/${selectedImage}`,
-      fun: fun,
+      fun: fun ? true : false,
     });
     fun = false;
   });
