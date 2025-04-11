@@ -53,11 +53,11 @@ app.get("/GetNextImage", (req, res) => {
     }
 
     while (!selectedImage && loopingQueue.length > 0) {
-      const nextFromQueue = sendNextQueue[loopindex];
-      loopindex++;
+      const nextFromQueue = sendNextQueue[0];
       if (files.includes(nextFromQueue)) {
         selectedImage = nextFromQueue;
         console.log("Serving queued image:", selectedImage);
+        sendNextQueue.push(sendNextQueue.shift());
         break;
       } else {
         console.log(`Queued file not found anymore: ${nextFromQueue}`);
@@ -125,7 +125,6 @@ app.delete("/RemoveImage/:filename", (req, res) => {
   const sourcePath = path.join(sourceDir, filename);
 
   if (remove) {
-    // Permanently delete
     fs.unlink(sourcePath, (err) => {
       if (err) {
         console.error(`Error deleting image "${filename}":`, err);
@@ -202,8 +201,8 @@ app.post("/SendNext", (req, res) => {
   res.send("Image added to send-next queue.");
 });
 
-app.post("/AddLoop", (req, res) => {
-  const { filename } = req.body;
+app.post("/AddLoop/:filename", (req, res) => {
+  const filename = req.params.filename;
   const filePath = path.join(__dirname, "images", filename);
 
   if (!fs.existsSync(filePath)) {
