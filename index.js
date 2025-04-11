@@ -149,10 +149,8 @@ function generateRandomDigits() {
   );
 }
 
-app.delete("/RemoveFromLoop/:filename", (req, res) => {
-  const { filename } = req.params;
-  const sourcePath = path.join(sourceDir, filename);
-
+app.delete("/RemoveFromLoop/", (req, res) => {
+  const { filename } = req.body;
   if (loopingQueue.find(filename)) delete loopingQueue.find(filename);
-  else res.send("Removed from Loop");
+  else res.json("Removed from Loop");
 });
