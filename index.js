@@ -109,8 +109,8 @@ app.post("/SendNext", (req, res) => {
   res.send("Image added to send-next queue.");
 });
 
-app.post("/AddLoop/:filename", (req, res) => {
-  const { filename } = req.params;
+app.post("/AddLoop", (req, res) => {
+  const { filename } = req.body;
   if (!fs.existsSync(path.join(__dirname, "images", filename)))
     return res.status(404).send("File not found.");
   loopingQueue.push(filename);
