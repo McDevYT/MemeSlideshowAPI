@@ -149,7 +149,7 @@ function generateRandomDigits() {
   );
 }
 
-app.delete("/RemoveFromLoop/", (req, res) => {
+app.delete("/RemoveFromLoop", (req, res) => {
   const { filename } = req.body;
   if (loopingQueue.find(filename)) delete loopingQueue.find(filename);
   else res.json("Removed from Loop");
