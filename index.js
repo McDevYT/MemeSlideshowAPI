@@ -8,6 +8,8 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 4000;
 
+const loopingQueue = [];
+const loopindex = 0;
 const sendNextQueue = [];
 
 const storage = multer.diskStorage({
@@ -40,6 +42,18 @@ app.get("/GetNextImage", (req, res) => {
 
     while (sendNextQueue.length > 0) {
       const nextFromQueue = sendNextQueue.shift();
+      if (files.includes(nextFromQueue)) {
+        selectedImage = nextFromQueue;
+        console.log("Serving queued image:", selectedImage);
+        break;
+      } else {
+        console.log(`Queued file not found anymore: ${nextFromQueue}`);
+      }
+    }
+
+    while (!selectedImage && loopingQueue.length > 0) {
+      const nextFromQueue = sendNextQueue[loopindex];
+      loopindex++;
       if (files.includes(nextFromQueue)) {
         selectedImage = nextFromQueue;
         console.log("Serving queued image:", selectedImage);
@@ -93,37 +107,68 @@ server.listen(port, () => {
 function generateRandomDigits() {
   let randomDigits = "";
   for (let i = 0; i < 10; i++) {
-    randomDigits += Math.floor(Math.random() * 10); // Generates a random digit between 0 and 9
+    randomDigits += Math.floor(Math.random() * 10);
   }
   return randomDigits;
 }
 
-app.delete("/DeleteImage/:filename", (req, res) => {
+app.delete("/RemoveImage/:filename", (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(__dirname, "images", filename);
+  const remove = req.query.remove === "true"; // Parse as boolean
+  const sourcePath = path.join(__dirname, "images", filename);
 
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error(`Error deleting image "${filename}":`, err);
-      return res.status(404).json({ message: "Image not found." });
+  if (remove) {
+    fs.unlink(sourcePath, (err) => {
+      if (err) {
+        console.error(`Error deleting image "${filename}":`, err);
+        return res.status(404).json({ message: "Image not found." });
+      }
+
+      console.log(`Image "${filename}" deleted.`);
+      res.json({ message: "Image deleted." });
+    });
+  } else {
+    const targetDir = path.join(__dirname, "removed_images");
+
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
     }
 
-    console.log(`Image "${filename}" deleted.`);
-    res.json({ message: "Image deleted." });
-  });
+    const targetPath = path.join(targetDir, filename);
+
+    fs.rename(sourcePath, targetPath, (err) => {
+      if (err) {
+        console.error(`Error moving image "${filename}":`, err);
+        return res
+          .status(404)
+          .json({ message: "Image not found or couldn't be moved." });
+      }
+
+      console.log(`Image "${filename}" moved to 'removed_images'.`);
+      res.json({ message: "Image moved to 'removed_images'." });
+    });
+  }
 });
 
 app.get("/GetAllImages", (req, res) => {
   console.log("GetAllImages Request");
-  fs.readdir(path.join(__dirname, "images"), (err, files) => {
+
+  const removed = req.query.removed === "true";
+  const targetDir = path.join(__dirname, removed ? "removed_images" : "images");
+
+  fs.readdir(targetDir, (err, files) => {
     if (err) {
-      console.error("Failed to read images folder:", err);
+      console.error(
+        `Failed to read ${removed ? "removed_images" : "images"} folder:`,
+        err
+      );
       return res.status(500).send("Server error");
     }
 
     const imageFiles = files.filter((file) =>
-      /\.(jpg|jpeg|png|gif|bmp|webp|png|jfif|PNG)$/i.test(file)
+      /\.(jpg|jpeg|png|gif|bmp|webp|jfif)$/i.test(file)
     );
+
     res.json(imageFiles);
   });
 });
@@ -148,10 +193,32 @@ app.post("/SendNext", (req, res) => {
   res.send("Image added to send-next queue.");
 });
 
+app.post("/AddLoop", (req, res) => {
+  const { filename } = req.body;
+  const filePath = path.join(__dirname, "images", filename);
+
+  if (!fs.existsSync(filePath)) {
+    console.log(`File not found: ${filename}`);
+    return res.status(404).send("File not found.");
+  }
+
+  loopingQueue.push(filename);
+  console.log(`Added to Loop: ${filename}`);
+  res.send("Image added to looping queue.");
+});
+
 app.get("/GetSendNextQueue", (req, res) => {
   res.json(sendNextQueue);
 });
 app.post("/ClearSendNextQueue", (req, res) => {
   sendNextQueue.length = 0;
   res.send("Queue cleared.");
+});
+
+app.post("/ClearLoop", (req, res) => {
+  loopingQueue.length = 0;
+  res.send("Queue cleared.");
+});
+app.get("/GetLoop", (req, res) => {
+  res.json(loopingQueue);
 });
