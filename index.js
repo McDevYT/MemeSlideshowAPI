@@ -110,7 +110,7 @@ app.delete("/RemoveImage/:filename", (req, res) => {
 app.get("/GetAllImages", (req, res) => {
   const targetDir = path.join(
     __dirname,
-    req.query.removed === "true" ? "removed_images" : "images"
+    req.body.removed === "true" ? "removed_images" : "images"
   );
 
   console.log(removed ? "getting removed images" : "Getting all images");
