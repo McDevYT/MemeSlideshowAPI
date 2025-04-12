@@ -108,12 +108,10 @@ app.delete("/RemoveImage/:filename", (req, res) => {
 });
 
 app.get("/GetAllImages", (req, res) => {
-  const targetDir = path.join(
-    __dirname,
-    req.body.removed === "true" ? "removed_images" : "images"
-  );
+  const removed = req.query.removed === "true";
+  const targetDir = path.join(__dirname, removed ? "removed_images" : "images");
 
-  console.log(removed ? "getting removed images" : "Getting all images");
+  console.log(removed ? "Getting removed images" : "Getting all images");
 
   fs.readdir(targetDir, (err, files) => {
     if (err) return res.status(500).send("Server error");
