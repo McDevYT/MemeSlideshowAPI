@@ -29,22 +29,42 @@ app.get("/GetNextImage", (req, res) => {
     if (err) return res.status(500).send("Server error.");
     if (files.length === 0) return res.status(404).send("No images found.");
 
-    let selectedImage =
-      sendNextQueue.find((file) => files.includes(file)) ||
-      loopingQueue.find((file) => files.includes(file)) ||
-      files[Math.floor(Math.random() * files.length)];
+    let selectedImage;
 
-    console.log(
-      selectedImage
-        ? `Serving image: ${selectedImage}`
-        : "No valid image found."
-    );
-    res.json({
+    for (let i = 0; i < sendNextQueue.length; i++) {
+      if (files.includes(sendNextQueue[i])) {
+        selectedImage = sendNextQueue[i];
+        sendNextQueue.splice(i, 1);
+        break;
+      }
+    }
+
+    if (!selectedImage) {
+      for (let i = 0; i < loopingQueue.length; i++) {
+        if (files.includes(loopingQueue[i])) {
+          selectedImage = loopingQueue[i];
+          const [moved] = loopingQueue.splice(i, 1);
+          loopingQueue.push(moved);
+          break;
+        }
+      }
+    }
+
+    if (!selectedImage) {
+      selectedImage = files[Math.floor(Math.random() * files.length)];
+    }
+
+    console.log(`Serving image: ${selectedImage}`);
+
+    const response = {
       filename: selectedImage,
       url: `https://51.12.220.246:4000/images/${selectedImage}`,
-      fun,
-    });
+    };
+
+    if (fun) response.fun = true;
     fun = false;
+
+    res.json(response);
   });
 });
 
