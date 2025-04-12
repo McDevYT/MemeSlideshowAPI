@@ -34,7 +34,7 @@ app.get("/GetNextImage", (req, res) => {
     for (let i = 0; i < sendNextQueue.length; i++) {
       if (files.includes(sendNextQueue[i])) {
         selectedImage = sendNextQueue[i];
-        sendNextQueue.splice(i, 1);
+        delete sendNextQueue[i];
         break;
       }
     }
@@ -127,6 +127,7 @@ app.post("/SendNext", (req, res) => {
     return res.status(404).send("File not found.");
   sendNextQueue.push(filename);
   res.send("Image added to send-next queue.");
+  console.log("Added to Send Next Queue: ", filename);
 });
 
 app.post("/AddLoop", (req, res) => {
@@ -171,6 +172,11 @@ function generateRandomDigits() {
 
 app.delete("/RemoveFromLoop", (req, res) => {
   const { filename } = req.body;
-  if (loopingQueue.find(filename)) delete loopingQueue.find(filename);
-  else res.json("Removed from Loop");
+  const index = loopingQueue.indexOf(filename);
+  if (index !== -1) {
+    loopingQueue.splice(index, 1);
+    res.send("Removed from loop.");
+  } else {
+    res.status(404).send("Image not in loop.");
+  }
 });
