@@ -33,8 +33,8 @@ app.get("/GetNextImage", (req, res) => {
 
     for (let i = 0; i < sendNextQueue.length; i++) {
       if (files.includes(sendNextQueue[i])) {
-        selectedImage = sendNextQueue[i];
-        delete sendNextQueue[i];
+        selectedImage = sendNextQueue.shift();
+        console.log("Sending from queue: ", selectedImage);
         break;
       }
     }
@@ -43,8 +43,9 @@ app.get("/GetNextImage", (req, res) => {
       for (let i = 0; i < loopingQueue.length; i++) {
         if (files.includes(loopingQueue[i])) {
           selectedImage = loopingQueue[i];
-          const [moved] = loopingQueue.splice(i, 1);
-          loopingQueue.push(moved);
+          console.log("looping: ", selectedImage);
+
+          loopingQueue.push(loopingQueue.shift());
           break;
         }
       }
@@ -52,9 +53,8 @@ app.get("/GetNextImage", (req, res) => {
 
     if (!selectedImage) {
       selectedImage = files[Math.floor(Math.random() * files.length)];
+      console.log(`Serving random image: ${selectedImage}`);
     }
-
-    console.log(`Serving image: ${selectedImage}`);
 
     const response = {
       filename: selectedImage,
@@ -85,6 +85,10 @@ app.delete("/RemoveImage/:filename", (req, res) => {
   );
   const sourcePath = path.join(sourceDir, filename);
 
+  console.log(
+    remove ? "Removing images permanently" : "Removing image temporarly"
+  );
+
   const handleDelete = (err) =>
     err
       ? res.status(404).json({ message: "Image not found." })
@@ -108,6 +112,9 @@ app.get("/GetAllImages", (req, res) => {
     __dirname,
     req.query.removed === "true" ? "removed_images" : "images"
   );
+
+  console.log(removed ? "getting removed images" : "Getting all images");
+
   fs.readdir(targetDir, (err, files) => {
     if (err) return res.status(500).send("Server error");
     res.json(
@@ -173,7 +180,9 @@ function generateRandomDigits() {
 app.delete("/RemoveFromLoop", (req, res) => {
   const { filename } = req.body;
   const index = loopingQueue.indexOf(filename);
+
   if (index !== -1) {
+    console.log("Removing from loop");
     loopingQueue.splice(index, 1);
     res.send("Removed from loop.");
   } else {
